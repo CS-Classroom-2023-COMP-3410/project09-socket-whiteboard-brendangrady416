@@ -1,0 +1,23 @@
+body {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #f8f9fa;
+}
+
+canvas {
+    border: 2px solid black;
+    display: block;
+    margin: 20px auto;
+    cursor: crosshair;
+}
+
+.controls {
+    margin: 10px;
+}
+
+button {
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+}
