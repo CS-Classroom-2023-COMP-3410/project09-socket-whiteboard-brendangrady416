@@ -1,47 +1,47 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const cors = require('cors');
+const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
-const io = require('socket.io')(server, {
+const io = new Server(server, {
     cors: {
-        origin: '*',
+        origin: "*",
         methods: ["GET", "POST"]
-    },
+    }
 });
 
-app.use(cors());
-app.use(express.static('public')); // Serve static files from 'public' folder
+let boardState = []; // Stores drawn points
 
-let boardState = []; // Store drawing actions
 
-io.on('connection', (socket) => {
-    console.log(`User connected: ${socket.id}`);
+io.on("connection", (socket) => {
+    console.log("User connected:", socket.id);
 
-    // Send the current board state to new clients
-    socket.emit('loadBoard', boardState);
+    // Send the current board state to the new client
+    socket.emit("boardState", boardState);
 
-    // Listen for drawing actions and broadcast them
-    socket.on('draw', (data) => {
+    // Listen for drawing events
+    socket.on("draw", (data) => {
+        console.log("Received drawing data:", data);
         boardState.push(data);
-        socket.broadcast.emit('draw', data);
+
+        // Send the drawing event to ALL clients, including the sender
+        io.emit("draw", data);
     });
 
-    // Handle clear board event
-    socket.on('clearBoard', () => {
-        boardState = []; // Reset board state
-        io.emit('clearBoard');
+    // Handle board clear event
+    socket.on("clearBoard", () => {
+        console.log("Board cleared");
+        boardState = [];
+        io.emit("clearBoard"); // Send event to all clients
     });
-
-    socket.on('disconnect', () => {
-        console.log(`User disconnected: ${socket.id}`);
+    
+    // Handle user disconnect
+    socket.on("disconnect", () => {
+        console.log("User disconnected:", socket.id);
     });
 });
 
-// Start the server
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`Server running on http://localhost:5173`);
+server.listen(5173, () => {
+    console.log("Server running on port 5173");
 });
